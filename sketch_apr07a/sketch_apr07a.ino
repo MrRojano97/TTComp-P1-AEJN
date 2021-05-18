@@ -10,6 +10,22 @@ int tempLow = 51;
 int humLow = 53;
 int humHigh = 52;
 
+//Declare data from DHT11 sensor
+int sensor = 3;
+int temperature;
+int humidity;
+DHT dhtSensor(sensor, DHT11); //Init Sensor
+LiquidCrystal lcd(4,5,6,7,8,9); //Initial pin LCD  
+
+//To send info at user about status temperature and humidity
+boolean sendAlertHumidity = true;
+boolean sendCorrectHumidity = true;
+boolean sendAlertTemperature = true;
+boolean sendCorrectTemperature = true;
+
+//enable or disable automatic control for temperature and humidity
+boolean automaticControl = true;
+
 //Declare light of House
 int lamp1 = 22;
 int lamp2 = 23;
@@ -20,19 +36,25 @@ int lamp6 = 27;
 int lamp7 = 28;
 int lamp8 = 29;
 
-//Declare data from DHT11 sensor
-int sensor = 3;
-int temperature;
-int humidity;
-DHT dhtSensor(sensor, DHT11); //Init Sensor
-LiquidCrystal lcd(4,5,6,7,8,9); //Initial pin LCD  
+//flags ligth
+boolean l1 = false;
+boolean l2 = false;
+boolean l3 = false;
+boolean l4 = false;
+boolean l5 = false;
+boolean l6 = false;
+boolean l7 = false;
+boolean l8 = false;
 
-boolean sendAlertHumidity = true;
-boolean sendCorrectHumidity = true;
-boolean sendAlertTemperature = true;
-boolean sendCorrectTemperature = true;
-
-boolean automaticControl = true;
+//Switch for lamps
+int switch1 = A0;
+int switch2 = A1;
+int switch3 = A2;
+int switch4 = A3;
+int switch5 = A7;
+int switch6 = A6;
+int switch7 = A5;
+int switch8 = A4;
 
 void setup() {
   dhtSensor.begin();
@@ -52,11 +74,21 @@ void setup() {
   pinMode(lamp6, OUTPUT);
   pinMode(lamp7, OUTPUT);
   pinMode(lamp8, OUTPUT);
+
+  pinMode(switch1, INPUT);
+  pinMode(switch2, INPUT);
+  pinMode(switch3, INPUT);
+  pinMode(switch4, INPUT);
+  pinMode(switch5, INPUT);
+  pinMode(switch6, INPUT);
+  pinMode(switch7, INPUT);
+  pinMode(switch8, INPUT);
 }
 
 void loop() {
   verifyRemoteData(); //Verify if there are data to process and execute
   controlHumidityandTemperature(); //Check data for Humidity and Temperature
+  controlLight();
 
   delay(200); //Wait for repeat loop
 }
@@ -75,6 +107,7 @@ void verifyRemoteData(){
     String aux = "";
     for(int i=0; char_array[i] != NULL; i++){
       if(char_array[i] == ';'){
+        Serial.println(aux);
         executeCommand(aux);
         aux="";
       }
@@ -137,6 +170,90 @@ void manualTemperatureControl(String command){
   }
 }
 
+void checkchangeOnlight(String command){
+  Serial.println(command);
+  if(command.indexOf("1") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp1, HIGH);
+      l1 = true;
+    }
+    else{
+      digitalWrite(lamp1, LOW);
+      l1 = false;
+    }
+  }
+  else if(command.indexOf("2") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp2, HIGH);
+      l2 = true;
+    }
+    else{
+      digitalWrite(lamp2, LOW);
+      l2 = false;
+    }
+  }
+  else if(command.indexOf("3") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp3, HIGH);
+      l3 = true;
+    }
+    else{
+      digitalWrite(lamp3, LOW);
+      l3 = false;
+    }
+  }
+  else if(command.indexOf("4") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp4, HIGH);
+      l4 = true;
+    }
+    else{
+      digitalWrite(lamp4, LOW);
+      l4 = false;
+    }
+  }
+  else if(command.indexOf("5") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp5, HIGH);
+      l5 = true;
+    }
+    else{
+      digitalWrite(lamp5, LOW);
+      l5 = false;
+    }
+  }
+  else if(command.indexOf("6") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp6, HIGH);
+      l6 = true;
+    }
+    else{
+      digitalWrite(lamp6, LOW);
+      l6 = false;
+    }
+  }
+  else if(command.indexOf("7") > 0){
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp7, HIGH);
+      l7 = true;
+    }
+    else{
+      digitalWrite(lamp7, LOW);
+      l7 = false;
+    }
+  }
+  else{
+    if(command.indexOf("on") > 0){
+      digitalWrite(lamp8, HIGH);
+      l8 = true;
+    }
+    else{
+      digitalWrite(lamp8, LOW);
+      l8 = false;
+    }
+  }
+}
+
 void executeCommand(String command){
   //manual control
   if(command.startsWith("c")){
@@ -152,14 +269,9 @@ void executeCommand(String command){
   }
   //light control
   else if(command.startsWith("l")){
-    
-  }
-  //voice control
-  else if(command.startsWith("v")){
-    
+    checkchangeOnlight(command);
   }
   else{
-    
   }
 }
 
@@ -244,4 +356,32 @@ void controlTemperature(int t){
       }
     }
   }  
+}
+
+//Check the light flags to apply status from switch to the lamp
+void controlLight(){
+  if(!l1){
+    digitalWrite(lamp1, digitalRead(switch1));
+  }
+  if(!l2){
+    digitalWrite(lamp2, digitalRead(switch2));
+  }
+  if(!l3){
+    digitalWrite(lamp3, digitalRead(switch3));
+  }
+  if(!l4){
+    digitalWrite(lamp4, digitalRead(switch4));
+  }
+  if(!l5){
+    digitalWrite(lamp5, digitalRead(switch5));
+  }
+  if(!l6){
+    digitalWrite(lamp6, digitalRead(switch6));
+  }
+  if(!l7){
+    digitalWrite(lamp7, digitalRead(switch7));
+  }
+  if(!l8){
+    digitalWrite(lamp8, digitalRead(switch8));
+  }
 }
