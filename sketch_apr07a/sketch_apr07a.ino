@@ -45,6 +45,7 @@ boolean l5 = false;
 boolean l6 = false;
 boolean l7 = false;
 boolean l8 = false;
+boolean allHouseFlag = false;
 
 //Switch for lamps
 int switch1 = A0;
@@ -55,6 +56,22 @@ int switch5 = A7;
 int switch6 = A6;
 int switch7 = A5;
 int switch8 = A4;
+
+int anochecer = A8;
+
+//Control door
+int abierto = A9;
+int cerrado = A10;
+int alarm = A11;
+
+//flag securityControl
+boolean securityControl = false;
+
+//Control move sensor
+int moveSensor = 10;
+
+//Flag alertSensor
+boolean alertMoveSensor = true;
 
 void setup() {
   dhtSensor.begin();
@@ -83,16 +100,24 @@ void setup() {
   pinMode(switch6, INPUT);
   pinMode(switch7, INPUT);
   pinMode(switch8, INPUT);
+
+  pinMode(anochecer, INPUT);
+
+  pinMode(abierto, OUTPUT);
+  pinMode(cerrado, OUTPUT);
+  pinMode(alarm, OUTPUT);
+
+  pinMode(moveSensor, INPUT);
 }
 
 void loop() {
   verifyRemoteData(); //Verify if there are data to process and execute
   controlHumidityandTemperature(); //Check data for Humidity and Temperature
   controlLight();
+  checkEntrance();
 
-  delay(200); //Wait for repeat loop
+  delay(100);
 }
-
 
 void verifyRemoteData(){
   if(Serial.available() > 0){
@@ -107,7 +132,6 @@ void verifyRemoteData(){
     String aux = "";
     for(int i=0; char_array[i] != NULL; i++){
       if(char_array[i] == ';'){
-        Serial.println(aux);
         executeCommand(aux);
         aux="";
       }
@@ -170,90 +194,133 @@ void manualTemperatureControl(String command){
   }
 }
 
+//Control unitary for lamps
 void checkchangeOnlight(String command){
-  Serial.println(command);
-  if(command.indexOf("1") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp1, HIGH);
-      l1 = true;
+  if(!allHouseFlag){
+    if(command.indexOf("1") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp1, HIGH);
+        l1 = true;
+      }
+      else{
+        digitalWrite(lamp1, LOW);
+        l1 = false;
+      }
+    }
+    else if(command.indexOf("2") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp2, HIGH);
+        l2 = true;
+      }
+      else{
+        digitalWrite(lamp2, LOW);
+        l2 = false;
+      }
+    }
+    else if(command.indexOf("3") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp3, HIGH);
+        l3 = true;
+      }
+      else{
+        digitalWrite(lamp3, LOW);
+        l3 = false;
+      }
+    }
+    else if(command.indexOf("4") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp4, HIGH);
+        l4 = true;
+      }
+      else{
+        digitalWrite(lamp4, LOW);
+        l4 = false;
+      }
+    }
+    else if(command.indexOf("5") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp5, HIGH);
+        l5 = true;
+      }
+      else{
+        digitalWrite(lamp5, LOW);
+        l5 = false;
+      }
+    }
+    else if(command.indexOf("6") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp6, HIGH);
+        l6 = true;
+      }
+      else{
+        digitalWrite(lamp6, LOW);
+        l6 = false;
+      }
+    }
+    else if(command.indexOf("7") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp7, HIGH);
+        l7 = true;
+      }
+      else{
+        digitalWrite(lamp7, LOW);
+        l7 = false;
+      }
+    }
+    else if(command.indexOf("8") > 0){
+      if(command.indexOf("on") > 0){
+        digitalWrite(lamp8, HIGH);
+        l8 = true;
+      }
+      else{
+        digitalWrite(lamp8, LOW);
+        l8 = false;
+      }
     }
     else{
-      digitalWrite(lamp1, LOW);
-      l1 = false;
-    }
-  }
-  else if(command.indexOf("2") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp2, HIGH);
-      l2 = true;
-    }
-    else{
-      digitalWrite(lamp2, LOW);
-      l2 = false;
-    }
-  }
-  else if(command.indexOf("3") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp3, HIGH);
-      l3 = true;
-    }
-    else{
-      digitalWrite(lamp3, LOW);
-      l3 = false;
-    }
-  }
-  else if(command.indexOf("4") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp4, HIGH);
-      l4 = true;
-    }
-    else{
-      digitalWrite(lamp4, LOW);
-      l4 = false;
-    }
-  }
-  else if(command.indexOf("5") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp5, HIGH);
-      l5 = true;
-    }
-    else{
-      digitalWrite(lamp5, LOW);
-      l5 = false;
-    }
-  }
-  else if(command.indexOf("6") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp6, HIGH);
-      l6 = true;
-    }
-    else{
-      digitalWrite(lamp6, LOW);
-      l6 = false;
-    }
-  }
-  else if(command.indexOf("7") > 0){
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp7, HIGH);
-      l7 = true;
-    }
-    else{
-      digitalWrite(lamp7, LOW);
-      l7 = false;
-    }
-  }
-  else{
-    if(command.indexOf("on") > 0){
-      digitalWrite(lamp8, HIGH);
-      l8 = true;
-    }
-    else{
-      digitalWrite(lamp8, LOW);
-      l8 = false;
+      //nothing to do
     }
   }
 }
 
+//on/off all lamps 
+void allHouse(String command){
+  if(command == "a on"){
+    allHouseFlag = true;
+    digitalWrite(lamp1, HIGH);
+    digitalWrite(lamp2, HIGH);
+    digitalWrite(lamp3, HIGH);
+    digitalWrite(lamp4, HIGH);
+    digitalWrite(lamp5, HIGH);
+    digitalWrite(lamp6, HIGH);
+    digitalWrite(lamp7, HIGH);
+    digitalWrite(lamp8, HIGH);
+  }
+  else{
+    allHouseFlag = false;
+    digitalWrite(lamp1, LOW);
+    digitalWrite(lamp2, LOW);
+    digitalWrite(lamp3, LOW);
+    digitalWrite(lamp4, LOW);
+    digitalWrite(lamp5, LOW);
+    digitalWrite(lamp6, LOW);
+    digitalWrite(lamp7, LOW);
+    digitalWrite(lamp8, LOW);
+  }
+}
+
+void checksecurityControl(String command){
+  if(command == "o on"){
+    securityControl = true;
+    digitalWrite(abierto, HIGH);
+    digitalWrite(cerrado, LOW);
+  }
+  else{
+    securityControl = false;
+  }
+}
+
+//Analyze command for send to specific function
 void executeCommand(String command){
   //manual control
   if(command.startsWith("c")){
@@ -271,7 +338,11 @@ void executeCommand(String command){
   else if(command.startsWith("l")){
     checkchangeOnlight(command);
   }
+  else if(command.startsWith("a")){
+    allHouse(command);
+  }
   else{
+    checksecurityControl(command);
   }
 }
 
@@ -285,7 +356,6 @@ void controlHumidityandTemperature(){
     controlHumidity(humidity);
     controlTemperature(temperature);
   }
-  //readSerial();
 }
 
 //Update panel LCD that contain info about status temperature and humidity
@@ -297,7 +367,7 @@ void updateLcd(int humidity, int temperature){
   lcd.print(String("Humedad: ")+String(humidity)+String("%"));
 }
 
-//Function for control the humidity.
+//Function for control the humidity in the range.
 void controlHumidity(int h){
   if(h >= 40 && h <= 60){
     digitalWrite(humLow, LOW);
@@ -328,6 +398,7 @@ void controlHumidity(int h){
   }
 }
 
+//Function for control the temperature in the range.
 void controlTemperature(int t){
   if(t >= 19 && t <= 25){
     digitalWrite(tempLow, LOW);
@@ -360,28 +431,64 @@ void controlTemperature(int t){
 
 //Check the light flags to apply status from switch to the lamp
 void controlLight(){
-  if(!l1){
-    digitalWrite(lamp1, digitalRead(switch1));
+  if(!allHouseFlag){
+    if(!l1){
+      digitalWrite(lamp1, digitalRead(switch1));
+    }
+    if(!l2){
+      digitalWrite(lamp2, digitalRead(switch2));
+    }
+    if(!l3){
+      digitalWrite(lamp3, digitalRead(switch3));
+    }
+    if(!l4){
+      digitalWrite(lamp4, digitalRead(switch4));
+    }
+    if(!l5){
+      digitalWrite(lamp5, digitalRead(switch5));
+    }
+    if(!l6){
+      digitalWrite(lamp6, digitalRead(switch6));
+    }
+    if(!l7){
+      digitalWrite(lamp7, digitalRead(switch7));
+    }
+    if(!l8){
+      digitalWrite(lamp8, digitalRead(switch8));
+    }
+    //Check if it's night
+    if(digitalRead(anochecer) > 0){
+      digitalWrite(lamp8, HIGH);
+    }
   }
-  if(!l2){
-    digitalWrite(lamp2, digitalRead(switch2));
+}
+
+//Check the entrance of move Sensor
+void checkEntrance(){
+  if(digitalRead(anochecer) > 0){
+    if(!securityControl){
+      if(digitalRead(moveSensor) == HIGH){
+        digitalWrite(alarm, HIGH);
+        delay(100);
+        digitalWrite(alarm, LOW);
+        digitalWrite(cerrado, HIGH);
+        digitalWrite(abierto, LOW);
+        
+        if(alertMoveSensor){
+          Serial.println("pon");
+          alertMoveSensor = false;
+        }
+      }
+      else{
+        alertMoveSensor = true;
+        digitalWrite(alarm, LOW);
+        digitalWrite(cerrado, LOW);
+        digitalWrite(abierto, HIGH);
+      }
+    }
   }
-  if(!l3){
-    digitalWrite(lamp3, digitalRead(switch3));
-  }
-  if(!l4){
-    digitalWrite(lamp4, digitalRead(switch4));
-  }
-  if(!l5){
-    digitalWrite(lamp5, digitalRead(switch5));
-  }
-  if(!l6){
-    digitalWrite(lamp6, digitalRead(switch6));
-  }
-  if(!l7){
-    digitalWrite(lamp7, digitalRead(switch7));
-  }
-  if(!l8){
-    digitalWrite(lamp8, digitalRead(switch8));
+  else{
+    digitalWrite(abierto, HIGH);
+    digitalWrite(cerrado, LOW);
   }
 }
